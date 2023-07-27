@@ -17,7 +17,6 @@ func GetByName(title string) Item {
 	}
 
 	return getItem
-
 }
 
 
@@ -61,3 +60,25 @@ func DeleteItem(item Item) Item {
 	return del
 }
 
+func main() {
+	fmt.Println("initial database: ", database)
+	a := Item{"first", "a test item"}
+	b := Item{"second", "a second item"}
+	c := Item{"third", "a third item"}
+
+	AddItem(a)
+	AddItem(a)
+	AddItem(a)
+
+	fmt.Println("second database: ", database)
+
+	DeleteItem(b)
+	fmt.Println("third database: ", database)
+
+	EditItem("third", Item{"fourth", "a new item"})
+	fmt.Println("fourth database: ", database)
+
+	x := GetByName("fourth")
+	y := GetByName("first")
+	fmt.Println(x, y)
+}
