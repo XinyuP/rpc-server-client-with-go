@@ -7,9 +7,12 @@ type Item struct {
 	body string
 }
 
-var database []Item
+type API int // used to elevate all our functions to methods
 
-func GetByName(title string) Item {
+var database []Item
+    // receiver for the API pointer
+func (a *API) GetByName(title string, reply *Item) error {
+	                    // caller     // results 
 	var getItem Item
 
 	for _, val := range database {
@@ -18,29 +21,33 @@ func GetByName(title string) Item {
 		}
 	}
 
-	return getItem
+	*reply = getItem
+
+	return nil
 }
 
-func AddItem(item Item) Item {
+func (a *API) AddItem(item Item, reply *Item) error {
 	database = append(database, item)
-	return item
+	*reply = item
+	return nil
 }
 
-func EditItem(title string, edit Item) Item {
+func (a *API) EditItem(edit Item, reply *Item) error {
 	var changed Item
 
 	for idx, val := range database {
-		if val.title == title {
+		if val.title == edit.title {
 			database[idx] = edit
 			changed = edit
 		}
 	}
 
-	return changed
+	*reply = changed
+	return nil
 }
 
 
-func DeleteItem(item Item) Item {
+func (a *API) DeleteItem(item Item, reply *Item) error {
 	var del Item
 
 	for idx, val := range database {
@@ -51,7 +58,8 @@ func DeleteItem(item Item) Item {
 		}
 	}
 
-	return del
+	*reply = del
+	return nil
 }
 
 func main() {
