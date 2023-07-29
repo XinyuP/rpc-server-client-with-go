@@ -1,97 +1,50 @@
 package main
 
-import "fmt"
+import (
+	"log"
+	"fmt"
+	"net/rpc"
+)
 
 type Item struct {
-	title string
-	body string
-}
-
-type API int // used to elevate all our functions to methods
-
-var database []Item
-
-    // receiver for the API pointer
-func (a *API) GetByName(title string, reply *Item) error {
-	                    // caller     // results 
-	var getItem Item
-
-	for _, val := range database {
-		if val.title == title {
-			getItem = val
-		}
-	}
-
-	*reply = getItem
-
-	return nil
-}
-
-func (a *API) AddItem(item Item, reply *Item) error {
-	database = append(database, item)
-	*reply = item
-	return nil
-}
-
-func (a *API) EditItem(edit Item, reply *Item) error {
-	var changed Item
-
-	for idx, val := range database {
-		if val.title == edit.title {
-			database[idx] = edit
-			changed = edit
-		}
-	}
-
-	*reply = changed
-	return nil
-}
-
-
-func (a *API) DeleteItem(item Item, reply *Item) error {
-	var del Item
-
-	for idx, val := range database {
-		if val.title == item.title && val.body == item.body {
-			database = append(database[:idx], database[idx+1:] ...)
-			del = item
-			break
-		}
-	}
-
-	*reply = del
-	return nil
+	Title string
+	Body string
 }
 
 func main() {
-	var api = new(API)
-	// create a server to conncet the methods we wrote 
-	err := rpc.Register(api)
-	// register the type so we can call its methods remotely
+	var reply Item
+	var db []Item
+
+	client, err := rpc.DialHTTP("tcp", "localhost:4040") 
+	// establish a connection with an RPC server on the local machine at 
+	// port 4040, and if it's successful, it provides a client for 
+	// communicating with that server. If it encounters any error during 
+	// this process, it returns that error.
 
 	if err != nil {
-		log.Fatal(error registering API, err)
+		log.Fatal("connection error", err)
 	}
 
+	a := Item{"first", "a test item"}
+	b := Item{"second", "a second item"}
+	c := Item{"third", "a third item"}
 
-	// fmt.Println("initial database: ", database)
-	// a := Item{"first", "a test item"}
-	// b := Item{"second", "a second item"}
-	// c := Item{"third", "a third item"}
+	client.Call("API.AddItem", a, &reply)
+	client.Call("API.AddItem", b, &reply)
+	client.Call("API.AddItem", c, &reply)
+	client.Call("API.GetDB", "", &db)
 
-	// AddItem(a)
-	// AddItem(b)
-	// AddItem(c)
+	fmt.Println("database: ", db)
 
-	// fmt.Println("second database: ", database)
+	client.Call("API.EditItem", Item{"second", "a new second item"}, &reply)
+	client.Call("API.GetDB", "", &db)	
+	fmt.Println("database: ", db)
 
-	// DeleteItem(b)
-	// fmt.Println("third database: ", database)
+	client.Call("API.DeleteItem", c, &reply)
+	client.Call("API.GetDB", "", &db)
+	fmt.Println("database: ", db)
 
-	// EditItem("third", Item{"fourth", "a new item"})
-	// fmt.Println("fourth database: ", database)
+	client.Call("API.GetByName", "first", &reply)
+	fmt.Println("first item: ", reply)
 
-	// x := GetByName("fourth")
-	// y := GetByName("first")
-	// fmt.Println(x, y)
 }
