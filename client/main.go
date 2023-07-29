@@ -10,6 +10,7 @@ type Item struct {
 type API int // used to elevate all our functions to methods
 
 var database []Item
+
     // receiver for the API pointer
 func (a *API) GetByName(title string, reply *Item) error {
 	                    // caller     // results 
@@ -63,24 +64,34 @@ func (a *API) DeleteItem(item Item, reply *Item) error {
 }
 
 func main() {
-	fmt.Println("initial database: ", database)
-	a := Item{"first", "a test item"}
-	b := Item{"second", "a second item"}
-	c := Item{"third", "a third item"}
+	var api = new(API)
+	// create a server to conncet the methods we wrote 
+	err := rpc.Register(api)
+	// register the type so we can call its methods remotely
 
-	AddItem(a)
-	AddItem(b)
-	AddItem(c)
+	if err != nil {
+		log.Fatal(error registering API, err)
+	}
 
-	fmt.Println("second database: ", database)
 
-	DeleteItem(b)
-	fmt.Println("third database: ", database)
+	// fmt.Println("initial database: ", database)
+	// a := Item{"first", "a test item"}
+	// b := Item{"second", "a second item"}
+	// c := Item{"third", "a third item"}
 
-	EditItem("third", Item{"fourth", "a new item"})
-	fmt.Println("fourth database: ", database)
+	// AddItem(a)
+	// AddItem(b)
+	// AddItem(c)
 
-	x := GetByName("fourth")
-	y := GetByName("first")
-	fmt.Println(x, y)
+	// fmt.Println("second database: ", database)
+
+	// DeleteItem(b)
+	// fmt.Println("third database: ", database)
+
+	// EditItem("third", Item{"fourth", "a new item"})
+	// fmt.Println("fourth database: ", database)
+
+	// x := GetByName("fourth")
+	// y := GetByName("first")
+	// fmt.Println(x, y)
 }
